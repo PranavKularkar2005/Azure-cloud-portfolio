@@ -61,3 +61,20 @@ jobs:
             --file 404.html \
             --auth-mode login \
             --overwrite
+          
+      - name: Verify deployed website file
+        run: |
+          echo "Checking source HTML:"
+          grep -n "My Technical Skills" index.html
+
+          echo "Downloading HTML from Azure:"
+          az storage blob download \
+            --account-name "${{ secrets.AZURE_STORAGE_ACCOUNT }}" \
+            --container-name '$web' \
+            --name index.html \
+            --file azure-index.html \
+            --auth-mode login \
+            --overwrite
+
+          echo "Checking downloaded Azure HTML:"
+          grep -n "My Technical Skills" azure-index.html
