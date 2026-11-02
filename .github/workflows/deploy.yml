@@ -1,0 +1,63 @@
+
+name: Deploy Portfolio to Azure
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy website to Azure Storage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Azure using OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Upload website files to Azure Storage
+        env:
+          STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+        run: |
+          az storage blob upload \
+            --account-name "$STORAGE_ACCOUNT" \
+            --container-name '$web' \
+            --name index.html \
+            --file index.html \
+            --auth-mode login \
+            --overwrite
+
+          az storage blob upload \
+            --account-name "$STORAGE_ACCOUNT" \
+            --container-name '$web' \
+            --name style.css \
+            --file style.css \
+            --auth-mode login \
+            --overwrite
+
+          az storage blob upload \
+            --account-name "$STORAGE_ACCOUNT" \
+            --container-name '$web' \
+            --name script.js \
+            --file script.js \
+            --auth-mode login \
+            --overwrite
+
+          az storage blob upload \
+            --account-name "$STORAGE_ACCOUNT" \
+            --container-name '$web' \
+            --name 404.html \
+            --file 404.html \
+            --auth-mode login \
+            --overwrite
